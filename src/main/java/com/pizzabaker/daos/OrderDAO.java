@@ -1,10 +1,12 @@
 package com.pizzabaker.daos;
 
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -49,24 +51,17 @@ public class OrderDAO {
 		Connection connection = null;
 		try {
 			connection = DBConnection.GetConnection();
-			PreparedStatement ps = connection.prepareStatement("INSERT INTO \"order\" (datetime, id_pizza, pizza_price, deleted) VALUES (?,?,?,?)", PreparedStatement.RETURN_GENERATED_KEYS);
-			ps.setDate(1, new java.sql.Date(order.getDatetime().getTime()));
-			ps.setLong(2, order.getBasePizza().getId());
-			ps.setDouble(3, order.getBasePizza().getPrice());
-			ps.setBoolean(4, false);
-			ps.execute();
-			ResultSet rs = ps.getGeneratedKeys();
-			if(!rs.next()) {
-				rs.close();
-				ps.close();
-				connection.close();
-				throw new DBConnectionException("The id of the order was not generated", null);
-			}
-			long id = rs.getLong(1);
-			rs.close();
-			ps.close();
+			CallableStatement callableStatement = connection.prepareCall("{ ? = call ins_order(?, ?, ?) }");
+			callableStatement.registerOutParameter(1, Types.BIGINT);
+			callableStatement.setDate(2, new java.sql.Date(order.getDatetime().getTime()));
+			callableStatement.setLong(3, order.getBasePizza().getId());
+			callableStatement.setDouble(4, order.getBasePizza().getPrice());
+			callableStatement.execute();
+			long id = callableStatement.getLong(1);
+			callableStatement.close();
+			
 			// insert the order lines
-			ps = connection.prepareStatement("INSERT INTO order_ingredient_detail (id_order, id_ingredient_detail, quantity, price) VALUES (?,?,?,?)");
+			PreparedStatement ps = connection.prepareStatement("INSERT INTO order_ingredient_detail (id_order, id_ingredient_detail, quantity, price) VALUES (?,?,?,?)");
 			for(OrderIngredient line : order.getIngredients()) {
 				ps.setLong(1, id);
 				ps.setLong(2, line.getIngredientDetail().getId());
