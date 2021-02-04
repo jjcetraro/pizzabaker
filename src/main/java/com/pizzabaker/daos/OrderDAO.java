@@ -17,6 +17,7 @@ import com.pizzabaker.entities.BasePizza;
 import com.pizzabaker.entities.IngredientDetail;
 import com.pizzabaker.entities.Order;
 import com.pizzabaker.entities.OrderIngredient;
+import com.pizzabaker.entities.Supplier;
 
 public class OrderDAO {
 
@@ -30,7 +31,7 @@ public class OrderDAO {
 		Connection connection = null;
 		try {
 			connection = DBConnection.GetConnection();
-			Map<Long, Order> mapOrderById = getMapOrdersById_lazy(connection, null);
+			Map<Long, Order> mapOrderById = getMapOrdersById_lazy(connection);
 			Map<Long, List<OrderIngredient>> mapOrderIngredientsByOrderId = getMapOrderIngredientsByOrderId(connection, null);
 			List<Order> ret = new ArrayList<>();
 			for(Entry<Long, Order> entry : mapOrderById.entrySet()) {
@@ -87,19 +88,15 @@ public class OrderDAO {
 	//--------------------------------------------------------------------------------------------------
 	//--------------------------------------------------------------------------------------------------
 	
-	private Map<Long, Order> getMapOrdersById_lazy(Connection connection, String condition) throws SQLException{
+	private Map<Long, Order> getMapOrdersById_lazy(Connection connection) throws SQLException{
 		Map<Long, BasePizza> mapBasePizzaById = null;
 		try{
 			mapBasePizzaById = new BasePizzaDAO().getMapBasePizzasById();
 		}catch(Exception ex) {
 			throw new SQLException(ex);
 		}
-		String query = "SELECT * FROM \"order\"";
-		if(condition != null && !condition.trim().isEmpty()) {
-			query += " WHERE " + condition;
-		}
-		PreparedStatement ps = connection.prepareStatement(query);
-		ResultSet rs = ps.executeQuery();
+		CallableStatement callableStatement = connection.prepareCall("{ call fetch_orders(false) }");
+		ResultSet rs = callableStatement.executeQuery();
 		Map<Long, Order> ret = new HashMap<>();
 		while(rs.next()) {
 			long id = rs.getLong("id");
@@ -110,7 +107,7 @@ public class OrderDAO {
 			ret.put(id, order);
 		}
 		rs.close();
-		ps.close();
+		callableStatement.close();
 		return ret;
 	}
 	
