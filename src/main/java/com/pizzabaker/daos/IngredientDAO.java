@@ -64,9 +64,9 @@ public class IngredientDAO {
 		Connection connection = null;
 		try {
 			connection = DBConnection.GetConnection();
-			PreparedStatement ps = connection.prepareStatement("UPDATE ingredient_detail SET deleted=true WHERE id=" + ingredientDetailId);
-			ps.executeUpdate();
-			ps.close();
+			CallableStatement callableStatement = connection.prepareCall("{ call del_ingredient_detail(?) }");
+			callableStatement.setLong(1, ingredientDetailId);
+			callableStatement.execute();
 			connection.close();
 		} catch (SQLException e) {
 			try {
