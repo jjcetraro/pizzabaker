@@ -64,7 +64,7 @@ public class OrderDAO {
 			callableStatement = connection.prepareCall("{ ? = call ins_order_ingredient_detail(?, ?, ?, ?) }");
 			for(OrderIngredient ing : order.getIngredients()) {
 				callableStatement.registerOutParameter(1, Types.BIGINT);
-				callableStatement.setLong(2, id));
+				callableStatement.setLong(2, id);
 				callableStatement.setLong(3, ing.getIngredientDetail().getId());
 				callableStatement.setInt(4, ing.getQuantity());
 				callableStatement.setDouble(5, ing.getPrice());
