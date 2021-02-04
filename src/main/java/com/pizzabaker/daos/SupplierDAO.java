@@ -15,6 +15,7 @@ import java.util.Properties;
 
 import org.springframework.boot.autoconfigure.elasticsearch.ElasticsearchRestClientProperties;
 
+import com.pizzabaker.entities.BasePizza;
 import com.pizzabaker.entities.Supplier;
 
 public class SupplierDAO {
@@ -59,11 +60,20 @@ public class SupplierDAO {
 		Connection connection = null;
 		try {
 			connection = DBConnection.GetConnection();
-			String condition = "not deleted";
-			if(!includeHidden) {
-				condition += " AND not is_hidden";
+			CallableStatement callableStatement = connection.prepareCall("{ call fetch_suppliers(false) }");
+			ResultSet rs = callableStatement.executeQuery();
+			List<Supplier> ret = new ArrayList<>();
+			while(rs.next()) {
+				long id = rs.getLong("id");
+				String name = rs.getString("name");
+				String ingredients = rs.getString("ingredients");
+				boolean isHidden = rs.getBoolean("is_hidden");
+				if(includeHidden || !isHidden) {
+					ret.add(new Supplier(id, name, ingredients, isHidden));
+				}
 			}
-			List<Supplier> ret = selectSuppliers(connection, condition);
+			rs.close();
+			callableStatement.close();
 			connection.close();
 			return ret;
 		} catch(SQLException e) {

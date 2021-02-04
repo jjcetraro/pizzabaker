@@ -88,7 +88,12 @@ public class OrderDAO {
 	//--------------------------------------------------------------------------------------------------
 	
 	private Map<Long, Order> getMapOrdersById_lazy(Connection connection, String condition) throws SQLException{
-		Map<Long, BasePizza> mapBasePizzaById = new BasePizzaDAO().getMapBasePizzaById(connection, condition);
+		Map<Long, BasePizza> mapBasePizzaById = null;
+		try{
+			mapBasePizzaById = new BasePizzaDAO().getMapBasePizzasById();
+		}catch(Exception ex) {
+			throw new SQLException(ex);
+		}
 		String query = "SELECT * FROM \"order\"";
 		if(condition != null && !condition.trim().isEmpty()) {
 			query += " WHERE " + condition;

@@ -27,28 +27,19 @@ public class BasePizzaDAO {
 		Connection connection = null;
 		try {
 			connection = DBConnection.GetConnection();
-			return selectBasePizzas(connection, null);
-			/*CallableStatement callableStatement = connection.prepareCall("{ ? = call get_five() }");
-			callableStatement.registerOutParameter(1, Types.BIGINT);
-			callableStatement.execute();
-			System.out.println(callableStatement.getLong(1));*/
-			
-			
-			/*CallableStatement callableStatement = connection.prepareCall("{ ? = call fetch_all_pizza() }");
-			callableStatement.registerOutParameter(1, Types.OTHER);
-			callableStatement.execute();
-			System.out.println("HOLA");*/
-			
-			
-			
-			/*ResultSet rs = callableStatement.getArray(1).getResultSet();
+			CallableStatement callableStatement = connection.prepareCall("{ call fetch_pizzas() }");
+			ResultSet rs = callableStatement.executeQuery();
+			List<BasePizza> ret = new ArrayList<>();
 			while(rs.next()) {
-				System.out.println(rs.getInt(1));
+				long id = rs.getLong("id");
+				int size = rs.getInt("size");
+				double price = rs.getDouble("price");
+				ret.add(new BasePizza(id, size, price));
 			}
 			rs.close();
 			callableStatement.close();
 			connection.close();
-			return new ArrayList<>();*/
+			return ret;
 		} catch (SQLException e) {
 			try {
 				connection.close();
@@ -63,41 +54,6 @@ public class BasePizzaDAO {
 		for(BasePizza basePizza : listBasePizzas) {
 			ret.put(basePizza.getId(), basePizza);
 		}
-		return ret;
-	}
-	
-	//--------------------------------------------------------------------------------------------------
-	//--------------------------------------------------------------------------------------------------
-	//---------------------------------------- INTERNAL METHODS ----------------------------------------
-	//--------------------------------------------------------------------------------------------------
-	//--------------------------------------------------------------------------------------------------
-	
-	Map<Long, BasePizza> getMapBasePizzaById(Connection connection, String condition) throws SQLException{
-		List<BasePizza> listPizzas = selectBasePizzas(connection, condition);
-		Map<Long, BasePizza> ret = new HashMap<>();
-		for(BasePizza pizza : listPizzas) {
-			ret.put(pizza.getId(), pizza);
-		}
-		return ret;
-	}
-	
-	List<BasePizza> selectBasePizzas(Connection connection, String condition) throws SQLException{
-		String query = "SELECT * FROM pizza";
-		if(condition != null && !condition.trim().isEmpty()) {
-			query += " WHERE " + condition;
-		}
-		PreparedStatement ps = connection.prepareStatement(query);
-		ResultSet rs = ps.executeQuery();
-		List<BasePizza> ret = new ArrayList<>();
-		while(rs.next()) {
-			long id = rs.getLong("id");
-			int size = rs.getInt("size");
-			double price = rs.getDouble("price");
-			BasePizza basePizza = new BasePizza(id, size, price);
-			ret.add(basePizza);
-		}
-		rs.close();
-		ps.close();
 		return ret;
 	}
 }
