@@ -32,7 +32,7 @@ public class OrderDAO {
 		try {
 			connection = DBConnection.GetConnection();
 			Map<Long, Order> mapOrderById = getMapOrdersById_lazy(connection);
-			Map<Long, List<OrderIngredient>> mapOrderIngredientsByOrderId = getMapOrderIngredientsByOrderId(connection, null);
+			Map<Long, List<OrderIngredient>> mapOrderIngredientsByOrderId = getMapOrderIngredientsByOrderId(connection);
 			List<Order> ret = new ArrayList<>();
 			for(Entry<Long, Order> entry : mapOrderById.entrySet()) {
 				Order order = entry.getValue();
@@ -111,16 +111,12 @@ public class OrderDAO {
 		return ret;
 	}
 	
-	private Map<Long, List<OrderIngredient>> getMapOrderIngredientsByOrderId(Connection connection, String condition) throws SQLException{
+	private Map<Long, List<OrderIngredient>> getMapOrderIngredientsByOrderId(Connection connection) throws SQLException{
 		Map<Long, IngredientDetail> mapIngredientDetailById = new IngredientDAO().getMapIngredientDetailById(connection);
 		Map<Long, String> mapIngredientNameByDetailId = new IngredientDAO().getMapIngredientNameByIngredientDetailId(connection);
 		Map<Long, List<OrderIngredient>> ret = new HashMap<>();
-		String query = "SELECT * FROM order_ingredient_detail";
-		if(condition != null && !condition.trim().isEmpty()) {
-			query += " WHERE " + condition;
-		}
-		PreparedStatement ps = connection.prepareStatement(query);
-		ResultSet rs = ps.executeQuery();
+		CallableStatement callableStatement = connection.prepareCall("{ call fetch_order_ingredient_details() }");
+		ResultSet rs = callableStatement.executeQuery();
 		while(rs.next()) {
 			long idOrder = rs.getLong("id_order");
 			long idIngredientDetail = rs.getLong("id_ingredient_detail");
@@ -134,7 +130,7 @@ public class OrderDAO {
 			ret.get(idOrder).add(orderIngredient);
 		}
 		rs.close();
-		ps.close();
+		callableStatement.close();
 		return ret;
 	}
 }
