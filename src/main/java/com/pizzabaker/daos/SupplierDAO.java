@@ -78,13 +78,12 @@ public class SupplierDAO {
 		Connection connection = null;
 		try {
 			connection = DBConnection.GetConnection();
-			PreparedStatement ps = connection.prepareStatement("UPDATE supplier SET name=?, ingredients=?, is_hidden=? WHERE id=?");
-			ps.setString(1, supplier.getName());
-			ps.setString(2, supplier.getIngredients());
-			ps.setBoolean(3, supplier.isHidden());
-			ps.setLong(4, supplier.getId());
-			ps.executeUpdate();
-			ps.close();
+			CallableStatement callableStatement = connection.prepareCall("{ call upd_supplier(?, ?, ?, ?) }");
+			callableStatement.setLong(1, supplier.getId());
+			callableStatement.setString(2, supplier.getName());
+			callableStatement.setString(3, supplier.getIngredients());
+			callableStatement.setBoolean(4, supplier.isHidden());
+			callableStatement.execute();
 			connection.close();
 		} catch (SQLException e) {
 			try {
