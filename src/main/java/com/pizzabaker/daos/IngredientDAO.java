@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.pizzabaker.entities.BasePizza;
 import com.pizzabaker.entities.Ingredient;
 import com.pizzabaker.entities.IngredientDetail;
 import com.pizzabaker.entities.Supplier;
@@ -36,12 +37,8 @@ public class IngredientDAO {
 		Connection connection = null;
 		try {
 			connection = DBConnection.GetConnection();
-			Map<Long, Ingredient> mapIngredientsById = getMapIngredientsById_lazy(connection, "not deleted");
-			String condition = "not deleted";
-			if(!includeHidden) {
-				condition += " AND not is_hidden";
-			}
-			Map<Long, List<IngredientDetail>> mapIngredientDetailsByIngredientId = getMapIngredientsDetailsByIngredientId(connection, condition);
+			Map<Long, Ingredient> mapIngredientsById = getMapIngredientsById_lazy(connection, includeHidden, false);
+			Map<Long, List<IngredientDetail>> mapIngredientDetailsByIngredientId = getMapIngredientsDetailsByIngredientId(connection, includeHidden, false);
 			List<Ingredient> ret = new ArrayList<>();
 			for(Entry<Long, Ingredient> entry : mapIngredientsById.entrySet()) {
 				Ingredient ingredient = entry.getValue();
@@ -131,8 +128,8 @@ public class IngredientDAO {
 	//--------------------------------------------------------------------------------------------------
 	//--------------------------------------------------------------------------------------------------
 
-	Map<Long, IngredientDetail> getMapIngredientDetailById(Connection connection, String condition) throws SQLException{
-		Map<Long, List<IngredientDetail>> map = getMapIngredientsDetailsByIngredientId(connection, condition);
+	Map<Long, IngredientDetail> getMapIngredientDetailById(Connection connection) throws SQLException{
+		Map<Long, List<IngredientDetail>> map = getMapIngredientsDetailsByIngredientId(connection, true, true);
 		Map<Long, IngredientDetail> ret = new HashMap<>();
 		for(Entry<Long, List<IngredientDetail>> entry : map.entrySet()) {
 			for(IngredientDetail ingDetail : entry.getValue()) {
@@ -142,9 +139,9 @@ public class IngredientDAO {
 		return ret;
 	}
 	
-	Map<Long, String> getMapIngredientNameByIngredientDetailId(Connection connection, String condition) throws SQLException{
-		Map<Long, List<IngredientDetail>> map = getMapIngredientsDetailsByIngredientId(connection, condition);
-		Map<Long, Ingredient> mapIngredientById = getMapIngredientsById_lazy(connection, condition);
+	Map<Long, String> getMapIngredientNameByIngredientDetailId(Connection connection) throws SQLException{
+		Map<Long, List<IngredientDetail>> map = getMapIngredientsDetailsByIngredientId(connection, true, true);
+		Map<Long, Ingredient> mapIngredientById = getMapIngredientsById_lazy(connection, true, true);
 		Map<Long, String> ret = new HashMap<>();
 		for(Entry<Long, List<IngredientDetail>> entry : map.entrySet()) {
 			long ingredientId = entry.getKey();
@@ -161,15 +158,11 @@ public class IngredientDAO {
 	//--------------------------------------------------------------------------------------------------
 	//--------------------------------------------------------------------------------------------------
 	
-	private Map<Long, List<IngredientDetail>> getMapIngredientsDetailsByIngredientId(Connection connection, String condition) throws SQLException{
+	private Map<Long, List<IngredientDetail>> getMapIngredientsDetailsByIngredientId(Connection connection, boolean includeHidden, boolean includeDeleted) throws SQLException{
 		Map<Long, Supplier> mapSuppliers = new SupplierDAO().getMapSuppliersById(connection, null);
-		String query = "SELECT * FROM ingredient_detail";
-		if(condition != null && !condition.trim().isEmpty()) {
-			query += " WHERE " + condition;
-		}
-		query += " ORDER BY id";
-		PreparedStatement ps = connection.prepareStatement(query);
-		ResultSet rs = ps.executeQuery();
+		
+		CallableStatement callableStatement = connection.prepareCall("{ call fetch_ingredient_detail("+includeDeleted+") }");
+		ResultSet rs = callableStatement.executeQuery();
 		Map<Long, List<IngredientDetail>> map = new HashMap<>();
 		while(rs.next()) {
 			long id = rs.getLong("id");
@@ -180,6 +173,9 @@ public class IngredientDAO {
 			double price = rs.getDouble("price");
 			int quantity = rs.getInt("quantity");
 			boolean hidden = rs.getBoolean("is_hidden");
+			if(!includeHidden && hidden) {
+				continue;
+			}
 			IngredientDetail ingredientDetail = new IngredientDetail(id, province, price, quantity, supplier, hidden);
 			if(!map.containsKey(idIngredient)) {
 				map.put(idIngredient, new ArrayList<>());
@@ -187,15 +183,12 @@ public class IngredientDAO {
 			map.get(idIngredient).add(ingredientDetail);
 		}
 		rs.close();
-		ps.close();
+		callableStatement.close();
 		return map;
 	}
 	
-	private Map<Long, Ingredient> getMapIngredientsById_lazy(Connection connection, String condition) throws SQLException{
+	private Map<Long, Ingredient> getMapIngredientsById_lazy(Connection connection, boolean includeHidden, boolean includeDeleted) throws SQLException{
 		String query = "SELECT * FROM ingredient";
-		if(condition != null && !condition.trim().isEmpty()) {
-			query += " WHERE " + condition;
-		}
 		PreparedStatement ps = connection.prepareStatement(query);
 		ResultSet rs = ps.executeQuery();
 		Map<Long, Ingredient> map = new HashMap<>();

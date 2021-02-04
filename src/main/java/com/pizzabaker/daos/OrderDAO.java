@@ -115,8 +115,8 @@ public class OrderDAO {
 	}
 	
 	private Map<Long, List<OrderIngredient>> getMapOrderIngredientsByOrderId(Connection connection, String condition) throws SQLException{
-		Map<Long, IngredientDetail> mapIngredientDetailById = new IngredientDAO().getMapIngredientDetailById(connection, null);
-		Map<Long, String> mapIngredientNameByDetailId = new IngredientDAO().getMapIngredientNameByIngredientDetailId(connection, condition);
+		Map<Long, IngredientDetail> mapIngredientDetailById = new IngredientDAO().getMapIngredientDetailById(connection);
+		Map<Long, String> mapIngredientNameByDetailId = new IngredientDAO().getMapIngredientNameByIngredientDetailId(connection);
 		Map<Long, List<OrderIngredient>> ret = new HashMap<>();
 		String query = "SELECT * FROM order_ingredient_detail";
 		if(condition != null && !condition.trim().isEmpty()) {
