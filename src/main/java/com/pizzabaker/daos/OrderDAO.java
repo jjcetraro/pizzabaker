@@ -61,15 +61,16 @@ public class OrderDAO {
 			callableStatement.close();
 			
 			// insert the order lines
-			PreparedStatement ps = connection.prepareStatement("INSERT INTO order_ingredient_detail (id_order, id_ingredient_detail, quantity, price) VALUES (?,?,?,?)");
-			for(OrderIngredient line : order.getIngredients()) {
-				ps.setLong(1, id);
-				ps.setLong(2, line.getIngredientDetail().getId());
-				ps.setInt(3, line.getQuantity());
-				ps.setDouble(4, line.getPrice());
-				ps.execute();
+			callableStatement = connection.prepareCall("{ ? = call ins_order_ingredient_detail(?, ?, ?, ?) }");
+			for(OrderIngredient ing : order.getIngredients()) {
+				callableStatement.registerOutParameter(1, Types.BIGINT);
+				callableStatement.setLong(2, id));
+				callableStatement.setLong(3, ing.getIngredientDetail().getId());
+				callableStatement.setInt(4, ing.getQuantity());
+				callableStatement.setDouble(5, ing.getPrice());
+				callableStatement.execute();
 			}
-			ps.close();
+			callableStatement.close();
 			connection.close();
 		} catch (SQLException e) {
 			try {
