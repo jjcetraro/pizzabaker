@@ -115,10 +115,9 @@ public class SupplierDAO {
 		Connection connection = null;
 		try {
 			connection = DBConnection.GetConnection();
-			PreparedStatement ps = connection.prepareStatement("UPDATE supplier SET deleted=true WHERE id=?");
-			ps.setLong(1, id);
-			ps.executeUpdate();
-			ps.close();
+			CallableStatement callableStatement = connection.prepareCall("{ call del_supplier(?) }");
+			callableStatement.setLong(1, id);
+			callableStatement.execute();
 			connection.close();
 		} catch (SQLException e) {
 			try {
