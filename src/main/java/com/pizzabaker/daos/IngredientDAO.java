@@ -1,9 +1,11 @@
 package com.pizzabaker.daos;
 
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -94,32 +96,25 @@ public class IngredientDAO {
 		Connection connection = null;
 		try {
 			connection = DBConnection.GetConnection();
-			PreparedStatement ps = connection.prepareStatement("INSERT INTO ingredient (name, deleted) VALUES (?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
-			ps.setString(1, ingredient.getName());
-			ps.setBoolean(2, false);
-			ps.execute();
-			ResultSet rs = ps.getGeneratedKeys();
-			if(!rs.next()) {
-				rs.close();
-				ps.close();
-				connection.close();
-				throw new DBConnectionException("We couldnt get the auto generated id", null);
-			}
-			long id = rs.getLong(1);
-			rs.close();
-			ps.close();
-			ps = connection.prepareStatement("INSERT INTO ingredient_detail (id_ingredient, region, id_supplier, price, quantity, is_hidden, deleted) VALUES (?, ?, ?, ?, ?, ?, ?)");
+			CallableStatement callableStatement = connection.prepareCall("{ ? = call ins_ingredient(?) }");
+			callableStatement.registerOutParameter(1, Types.BIGINT);
+			callableStatement.setString(2, ingredient.getName());
+			callableStatement.execute();
+			long id = callableStatement.getLong(1);
+			callableStatement.close();
+			
+			callableStatement = connection.prepareCall("{ ? = call ins_ingredient_detail(?, ?, ?, ?, ?, ?) }");
 			for(IngredientDetail detail : ingredient.getIngredientDetails()) {
-				ps.setLong(1, id);
-				ps.setString(2, detail.getProvince());
-				ps.setLong(3, detail.getSupplier().getId());
-				ps.setDouble(4, detail.getPrice());
-				ps.setInt(5, detail.getQuantity());
-				ps.setBoolean(6, detail.isHidden());
-				ps.setBoolean(7, false);
-				ps.execute();
+				callableStatement.registerOutParameter(1, Types.BIGINT);
+				callableStatement.setLong(2, id);
+				callableStatement.setString(3, detail.getProvince());
+				callableStatement.setLong(4, detail.getSupplier().getId());
+				callableStatement.setDouble(5, detail.getPrice());
+				callableStatement.setInt(6, detail.getQuantity());
+				callableStatement.setBoolean(7, detail.isHidden());
+				callableStatement.execute();
 			}
-			ps.close();
+			callableStatement.close();
 			connection.close();
 		} catch (SQLException e) {
 			try {
