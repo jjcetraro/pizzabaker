@@ -37,7 +37,7 @@ public class IngredientDAO {
 		Connection connection = null;
 		try {
 			connection = DBConnection.GetConnection();
-			Map<Long, Ingredient> mapIngredientsById = getMapIngredientsById_lazy(connection, includeHidden, false);
+			Map<Long, Ingredient> mapIngredientsById = getMapIngredientsById_lazy(connection, false);
 			Map<Long, List<IngredientDetail>> mapIngredientDetailsByIngredientId = getMapIngredientsDetailsByIngredientId(connection, includeHidden, false);
 			List<Ingredient> ret = new ArrayList<>();
 			for(Entry<Long, Ingredient> entry : mapIngredientsById.entrySet()) {
@@ -141,7 +141,7 @@ public class IngredientDAO {
 	
 	Map<Long, String> getMapIngredientNameByIngredientDetailId(Connection connection) throws SQLException{
 		Map<Long, List<IngredientDetail>> map = getMapIngredientsDetailsByIngredientId(connection, true, true);
-		Map<Long, Ingredient> mapIngredientById = getMapIngredientsById_lazy(connection, true, true);
+		Map<Long, Ingredient> mapIngredientById = getMapIngredientsById_lazy(connection, true);
 		Map<Long, String> ret = new HashMap<>();
 		for(Entry<Long, List<IngredientDetail>> entry : map.entrySet()) {
 			long ingredientId = entry.getKey();
@@ -187,10 +187,9 @@ public class IngredientDAO {
 		return map;
 	}
 	
-	private Map<Long, Ingredient> getMapIngredientsById_lazy(Connection connection, boolean includeHidden, boolean includeDeleted) throws SQLException{
-		String query = "SELECT * FROM ingredient";
-		PreparedStatement ps = connection.prepareStatement(query);
-		ResultSet rs = ps.executeQuery();
+	private Map<Long, Ingredient> getMapIngredientsById_lazy(Connection connection, boolean includeDeleted) throws SQLException{
+		CallableStatement callableStatement = connection.prepareCall("{ call fetch_ingredients("+includeDeleted+") }");
+		ResultSet rs = callableStatement.executeQuery();
 		Map<Long, Ingredient> map = new HashMap<>();
 		while(rs.next()) {
 			long id = rs.getLong("id");
@@ -199,7 +198,7 @@ public class IngredientDAO {
 			map.put(id, ingredient);
 		}
 		rs.close();
-		ps.close();
+		callableStatement.close();
 		return map;
 	}
 	
