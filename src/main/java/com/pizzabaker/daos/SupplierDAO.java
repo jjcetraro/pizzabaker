@@ -1,5 +1,6 @@
 package com.pizzabaker.daos;
 
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -96,22 +97,13 @@ public class SupplierDAO {
 		Connection connection = null;
 		try {
 			connection = DBConnection.GetConnection();
-			PreparedStatement ps = connection.prepareStatement("INSERT INTO supplier (name, ingredients, is_hidden, deleted) VALUES (?, ?, ?, ?)", PreparedStatement.RETURN_GENERATED_KEYS);
-			ps.setString(1, supplier.getName());
-			ps.setString(2, supplier.getIngredients());
-			ps.setBoolean(3, supplier.isHidden());
-			ps.setBoolean(4, false);
-			ps.execute();
-			ResultSet rs = ps.getGeneratedKeys();
-			if(!rs.next()) {
-				rs.close();
-				ps.close();
-				connection.close();
-				throw new DBConnectionException("There was an error trying to get the generated id for the supplier added", null);
-			}
-			long id = rs.getLong(1);
-			rs.close();
-			ps.close();
+			CallableStatement callableStatement = connection.prepareCall("{ ? = call ins_supplier(?, ?, ?) }");
+			callableStatement.registerOutParameter(1, Types.BIGINT);
+			callableStatement.setString(2, supplier.getName());
+			callableStatement.setString(3, supplier.getIngredients());
+			callableStatement.setBoolean(4, supplier.isHidden());
+			callableStatement.execute();
+			long id = callableStatement.getLong(1);
 			connection.close();
 			supplier.setId(id);
 		} catch (SQLException e) {
