@@ -80,9 +80,9 @@ public class IngredientDAO {
 		Connection connection = null;
 		try {
 			connection = DBConnection.GetConnection();
-			PreparedStatement ps = connection.prepareStatement("UPDATE ingredient_detail SET is_hidden=(not is_hidden) WHERE id=" + ingredientDetailId);
-			ps.executeUpdate();
-			ps.close();
+			CallableStatement callableStatement = connection.prepareCall("{ call upd_ingredient_detail_visibility(?) }");
+			callableStatement.setLong(1, ingredientDetailId);
+			callableStatement.execute();
 			connection.close();
 		} catch (SQLException e) {
 			try {
