@@ -159,7 +159,12 @@ public class IngredientDAO {
 	//--------------------------------------------------------------------------------------------------
 	
 	private Map<Long, List<IngredientDetail>> getMapIngredientsDetailsByIngredientId(Connection connection, boolean includeHidden, boolean includeDeleted) throws SQLException{
-		Map<Long, Supplier> mapSuppliers = new SupplierDAO().getMapSuppliersById(connection, null);
+		Map<Long, Supplier> mapSuppliers = null;
+		try{
+			mapSuppliers = new SupplierDAO().getMapSuppliersById();
+		}catch(Exception ex) {
+			throw new SQLException("There was an error trying to select the suppliers from the db", ex);
+		}
 		
 		CallableStatement callableStatement = connection.prepareCall("{ call fetch_ingredient_detail("+includeDeleted+") }");
 		ResultSet rs = callableStatement.executeQuery();

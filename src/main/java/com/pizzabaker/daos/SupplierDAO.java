@@ -30,20 +30,28 @@ public class SupplierDAO {
 		Connection connection = null;
 		try {
 			connection = DBConnection.GetConnection();
-			List<Supplier> listSuppliers = selectSuppliers(connection, "id = " + id);
-			connection.close();
-			if(listSuppliers.isEmpty()) {
-				throw new NoDataException("There is no supplier of id '"+id+"'", null);
-			}else if(listSuppliers.size() == 1) {
-				return listSuppliers.get(0);
-			}else {
-				throw new CorruptedDBException("There is more than one supplier with the id '"+id+"'", null);
+			CallableStatement callableStatement = connection.prepareCall("{ call fetch_supplier_by_id(?) }");
+			callableStatement.setLong(1, id);
+			ResultSet rs = callableStatement.executeQuery();
+			if(!rs.next()) {
+				rs.close();
+				callableStatement.close();
+				connection.close();
+				throw new NoDataException("There is no supplier with id '"+id+"'", null);
 			}
-		} catch (SQLException e) {
+			String name = rs.getString("name");
+			String ingredients = rs.getString("ingredients");
+			boolean isHidden = rs.getBoolean("is_hidden");
+			Supplier ret = new Supplier(id, name, ingredients, isHidden);
+			rs.close();
+			callableStatement.close();
+			connection.close();
+			return ret;
+		} catch(SQLException e) {
 			try {
 				connection.close();
 			} catch(Exception ex) {}
-			throw new DBConnectionException("There was an error trying to select the supplier of id '"+id+"'", e);
+			throw new DBConnectionException("There was an error trying to get the supplier with the id '"+id+"'", e);
 		}
 	}
 	
@@ -143,16 +151,16 @@ public class SupplierDAO {
 	//--------------------------------------------------------------------------------------------------
 	//--------------------------------------------------------------------------------------------------
 	
-	Map<Long, Supplier> getMapSuppliersById(Connection connection, String condition) throws SQLException{
+	/*Map<Long, Supplier> getMapSuppliersById(Connection connection, String condition) throws SQLException{
 		List<Supplier> listSuppliers = selectSuppliers(connection, condition);
 		Map<Long, Supplier> ret = new HashMap<>();
 		for(Supplier supplier : listSuppliers) {
 			ret.put(supplier.getId(), supplier);
 		}
 		return ret;
-	}
+	}*/
 	
-	List<Supplier> selectSuppliers(Connection connection, String condition) throws SQLException{
+	/*List<Supplier> selectSuppliers(Connection connection, String condition) throws SQLException{
 		String query = "SELECT * FROM supplier";
 		if(condition != null && !condition.trim().isEmpty()) {
 			query += " WHERE " + condition;
@@ -172,5 +180,5 @@ public class SupplierDAO {
 		rs.close();
 		ps.close();
 		return ret;
-	}
+	}*/
 }
