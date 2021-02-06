@@ -3,18 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Order your pizza</title>
+    <title>Suppliers</title>
+    <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css">
+    
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Lobster&display=swap');
         @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
         * {
             box-sizing: border-box;
             font-family: 'Roboto', sans-serif;
-        }
-        body {
-            background: #2F323A;
-            margin: 0;
         }
         span {
             text-align: left;
@@ -50,9 +48,7 @@
             background: #1DC4E7;
         }
         .container {
-            margin: auto;
             background: white;
-            width: 1000px;
             height: 100vh;
             padding: 20px 40px;
             text-align: center;
@@ -146,7 +142,33 @@
     </style>
 </head>
 <body>
-    <div class="container">
+    <input type="checkbox" id="check">
+    <!--**************************************************************-->
+    <!--*************************** HEADER ***************************-->
+    <!--**************************************************************-->
+    <header>
+        <label for="check">
+            <i class="fas fa-bars" id="sidebar_btn"></i>
+        </label>
+        <div class="left_area">
+            <h3>Pizza <span>Bake</span></h3>
+        </div>
+    </header>
+    <!--**************************************************************-->
+    <!--************************** SIDEBAR  **************************-->
+    <!--**************************************************************-->
+    <div class="sidebar">
+        <a href="orders"><i class="fas fa-euro-sign"></i><span>Orders</span></a>
+        <a href="ingredients"><i class="fas fa-pepper-hot"></i><span>Ingredients</span></a>
+        <a href="suppliers"><i class="fas fa-truck"></i><span>Suppliers</span></a>
+        <a href="order-your-pizza"><i class="fas fa-pizza-slice"></i><span>Order your Pizza</span></a>
+    </div>
+    
+    <!--**************************************************************-->
+    <!--************************** CONTENT  **************************-->
+    <!--**************************************************************-->
+   
+    <div class="content">
         <h1 class="title">Order your Pizza</h1>
         <div class="order">
             <div class="base-pizza">
@@ -194,7 +216,9 @@
                 <span id="spanTotalPrice" style="text-align: right;">$ 0.00</span>
             </div>
         </div>
-        <button class="confirm-order-button" onclick="onClickConfirmOrder()">Confirm Order</button>
+        <div style="text-align:center">
+        	<button class="confirm-order-button" onclick="onClickConfirmOrder()">Confirm Order</button>
+        </div>
     </div>
 
     <!-- Modal Select Base Pizza -->
