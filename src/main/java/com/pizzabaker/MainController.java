@@ -227,6 +227,19 @@ public class MainController {
 		return new RedirectView("ingredients");
 	}
 	
+	@PostMapping("/restockIngredient")
+	public RedirectView restockIngredientDetail(Model model, @RequestParam("id") long id, @RequestParam("quantity") int quantity) {
+		IngredientDAO ingredientDAO = new IngredientDAO();
+		try {
+			ingredientDAO.restockIngredientDetail(id, quantity);
+		} catch (DBConnectionException e) {
+			e.printStackTrace();
+			model.addAttribute("errorMessage", e.getMessage());
+			new RedirectView("error");
+		}
+		return new RedirectView("ingredients");
+	}
+	
 	//--------------------------------------------------------------------------------------------------------------------
 	//--------------------------------------------------------------------------------------------------------------------
 	//------------------------------------------------- ORDER YOUR PIZZA -------------------------------------------------

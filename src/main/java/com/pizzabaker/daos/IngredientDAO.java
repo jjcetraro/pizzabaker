@@ -121,6 +121,23 @@ public class IngredientDAO {
 		}
 	}
 	
+	public void restockIngredientDetail(long id, int quantity) throws DBConnectionException {
+		Connection connection = null;
+		try {
+			connection = DBConnection.GetConnection();
+			CallableStatement callableStatement = connection.prepareCall("{ call restock_ingredient_detail(?, ?) }");
+			callableStatement.setLong(1, id);
+			callableStatement.setInt(2, quantity);
+			callableStatement.execute();
+			connection.close();
+		} catch (SQLException e) {
+			try {
+				connection.close();
+			} catch(Exception ex) {}
+			throw new DBConnectionException("There was an error trying restock the ingredient detail with id '"+id+"'", e);
+		}
+	}
+	
 	
 	//--------------------------------------------------------------------------------------------------
 	//--------------------------------------------------------------------------------------------------

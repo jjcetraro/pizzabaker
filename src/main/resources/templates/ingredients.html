@@ -65,6 +65,8 @@
                         <i class="fas fa-eye" th:onclick="onClickHideShowIngredient([[${row.getIngredientDetailId()}]])"></i>
                         &nbsp;&nbsp;
                         <i class="fas fa-trash icon-button" th:onclick="onClickDeleteIngredient([[${row.getIngredientDetailId()}]])"></i>
+                        &nbsp;&nbsp;
+                        <i class="fas fa-plus icon-button" th:onclick="openRestockModal([[${row.getIngredientDetailId()}]])"></i>
                     </td>
 				</tr>
             </tbody>
@@ -119,11 +121,44 @@
         </div>
     </div>
 
+    
+    <!-- Modal Restock Ingredient -->
+    <div id="modal-restock-ingredient" class="modal">
+        <!-- Modal content -->
+        <div class="modal-content">
+            <div class="modal-title">
+                <span style="font-weight: bold;font-size: 22px;">Restock Ingredient</span>
+                <span id="close-modal-restock-ingredient" class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <span style="display: inline-flex;align-items: flex-end;padding-bottom:20px">How many units do you want to add?</span>
+                <input id="inputQuantityRestock" type="text" style="height: 40px;">
+            </div>
+            <div style="text-align: right;">
+                <button class="sky-btn" style="width: 150px;" onclick="onClickRestockIngredient()">Restock</button>
+            </div>
+        </div>
+    </div>
+
     <script>
+    	let INGREDIENT_TO_RESTOCK = -1;
+    
         // initialize modal-add-ingredient
-        var modalAddIngredient = document.getElementById("modal-add-ingredient");
-        var btnAddIngredient = document.getElementById("btn-add-ingredient");
-        var spanCloseAddIngredient = document.getElementById("close-modal-add-ingredient");
+        const modalRestockIngredient = document.getElementById('modal-restock-ingredient');
+        const spanCloseRestockIngredient = document.getElementById("close-modal-restock-ingredient");
+        
+        spanCloseRestockIngredient.onclick = function() {
+            modalRestockIngredient.style.display = "none";
+        }
+        
+        function openRestockModal(ingredientId) {
+        	INGREDIENT_TO_RESTOCK = ingredientId;
+        	modalRestockIngredient.style.display = "block";
+        }
+        
+        const modalAddIngredient = document.getElementById("modal-add-ingredient");
+        const btnAddIngredient = document.getElementById("btn-add-ingredient");
+        const spanCloseAddIngredient = document.getElementById("close-modal-add-ingredient");
         btnAddIngredient.onclick = function() {
             modalAddIngredient.style.display = "block";
         }
@@ -135,6 +170,8 @@
         window.onclick = function(event) {
             if (event.target == modalAddIngredient) {
                 modalAddIngredient.style.display = "none";
+            } else if (event.target == modalRestockIngredient) {
+                modalRestockIngredient.style.display = "none";
             }
         }
         
@@ -192,6 +229,17 @@
         		details.push(tds[0].innerText + '###' + tds[1].dataset.id + '###' + tds[2].innerText);
         	}
         	post('/addIngredient', {name, details});
+        }
+        
+        // restock ingredient
+        
+        function onClickRestockIngredient(){
+        	const quantity = Number(document.getElementById('inputQuantityRestock').value);
+        	if(isNaN(quantity) || quantity <= 0 || !Number.isInteger(quantity)){
+        		alert('The quantity entered is not valid (You have to enter a positive integer)');
+        		return;
+        	}
+        	post('/restockIngredient', {id: INGREDIENT_TO_RESTOCK, quantity});
         }
 
 
