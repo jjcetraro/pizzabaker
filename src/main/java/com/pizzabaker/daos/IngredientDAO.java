@@ -129,12 +129,51 @@ public class IngredientDAO {
 			callableStatement.setLong(1, id);
 			callableStatement.setInt(2, quantity);
 			callableStatement.execute();
+			callableStatement.close();
 			connection.close();
 		} catch (SQLException e) {
 			try {
 				connection.close();
 			} catch(Exception ex) {}
 			throw new DBConnectionException("There was an error trying restock the ingredient detail with id '"+id+"'", e);
+		}
+	}
+	
+	public void updateIngredient(long ingDetailId, String ingName, String region, double price) throws DBConnectionException {
+		Connection connection = null;
+		try {
+			connection = DBConnection.GetConnection();
+			// get ingredient id
+			Map<Long, List<IngredientDetail>> mapIngredientDetails = getMapIngredientsDetailsByIngredientId(connection, true, true);
+			long ingId = -1;
+			for(Entry<Long, List<IngredientDetail>> entry : mapIngredientDetails.entrySet()) {
+				for(IngredientDetail ingDetail : entry.getValue()) {
+					if(ingDetail.getId() == ingDetailId) {
+						ingId = entry.getKey();
+						break;
+					}
+				}
+				if(ingId != -1) break;
+			}
+			// update ingredient name
+			CallableStatement callableStatement = connection.prepareCall("{ call upd_ingredient(?, ?) }");
+			callableStatement.setLong(1, ingId);
+			callableStatement.setString(2, ingName);
+			callableStatement.execute();
+			callableStatement.close();
+			// update ingredient detail region and price
+			callableStatement = connection.prepareCall("{ call upd_ingredient_detail(?, ?, ?) }");
+			callableStatement.setLong(1, ingDetailId);
+			callableStatement.setString(2, region);
+			callableStatement.setDouble(3, price);
+			callableStatement.execute();
+			callableStatement.close();
+			connection.close();
+		} catch (SQLException e) {
+			try {
+				connection.close();
+			} catch(Exception ex) {}
+			throw new DBConnectionException("There was an error trying update the ingredient detail with id '"+ingDetailId+"'", e);
 		}
 	}
 	

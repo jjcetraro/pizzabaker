@@ -175,7 +175,7 @@
                 <span style="font-weight: bold;">Base Pizza:</span>
                 <span id="spanBasePizza">- select your pizza -</span>
                 <button id="btn-select-base-pizza" class="sky-btn">Select</button>
-                <span id="spanBasePizzaPrice" style="text-align: right;font-weight: bold;font-size: 20px;">$ 0.00</span>
+                <span id="spanBasePizzaPrice" style="text-align: right;font-weight: bold;font-size: 20px;">€ 0.00</span>
             </div>
             <div class="ingredients">
                 <div class="ingredients-title">
@@ -198,22 +198,12 @@
                         </tr>
                     </thead>
                     <tbody id="tbodyIngredients">
-                        <!--<tr class="selectable_tr">
-                            <td>Cheese</td>
-                            <td>Italy</td>
-                            <td>$ 0.40</td>
-                            <td>1</td>
-                            <td>$ 0.40</td>
-                            <td>
-                                <i class="fas fa-trash icon-button" style="cursor: pointer;"></i>
-                            </td>
-                        </tr>-->
                     </tbody>
                 </table>
             </div>
             <div class="total-price">
                 <span>Total Price</span>
-                <span id="spanTotalPrice" style="text-align: right;">$ 0.00</span>
+                <span id="spanTotalPrice" style="text-align: right;">€ 0.00</span>
             </div>
         </div>
         <div style="text-align:center">
@@ -332,7 +322,7 @@
 			basePizzaPrice = selectBasePizza.options[selectBasePizza.selectedIndex].dataset.price;
 			const description = selectBasePizza.options[selectBasePizza.selectedIndex].text.trim();
         	document.getElementById('spanBasePizza').innerText = description;
-        	document.getElementById('spanBasePizzaPrice').innerText = '$ ' + Number(basePizzaPrice).toFixed(2);
+        	document.getElementById('spanBasePizzaPrice').innerText = '€ ' + Number(basePizzaPrice).toFixed(2);
             modalSelectBasePizza.style.display = "none";
             updateTotalPrice();
         }
@@ -344,7 +334,7 @@
         	for(let i = 0; i < tds.length; i++){
         		totalPrice += Number(tds[i].dataset.price);
         	}
-        	document.getElementById('spanTotalPrice').innerText = '$ ' + Number(totalPrice).toFixed(2);
+        	document.getElementById('spanTotalPrice').innerText = '€ ' + Number(totalPrice).toFixed(2);
         }
         
         // on change select ingredient
@@ -391,7 +381,7 @@
         		document.getElementById('spanIngredientPrice').innerText = '';
         		return;
         	}
-        	document.getElementById('spanIngredientPrice').innerText = '$ ' + Number(regionPrice).toFixed(2);
+        	document.getElementById('spanIngredientPrice').innerText = '€ ' + Number(regionPrice).toFixed(2);
         }
         
         // add ingredient to table
@@ -411,9 +401,9 @@
        			<tr class="selectable_tr" data-id="${regionId}" data-quantity="${quantity}" data-price="${regionPrice}">
                      <td>${ingredientName}</td>
                      <td>${regionName}</td>
-                     <td>$ ${regionPrice}</td>
+                     <td>€ ${regionPrice}</td>
                      <td>${quantity}</td>
-                     <td class="tdIngredientTotalPrice" data-price="${total}">$ ${total.toFixed(2)}</td>
+                     <td class="tdIngredientTotalPrice" data-price="${total}">€ ${total.toFixed(2)}</td>
                      <td>
                          <i class="fas fa-trash icon-button" style="cursor: pointer;" onclick="onClickRemoveIngredient(this)"></i>
                      </td>

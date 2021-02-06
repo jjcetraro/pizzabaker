@@ -44,16 +44,16 @@
                 <div class="order-body">
                     <div class="order-body-row">
                         <span th:text="${order.getBasePizza().getSize() + ' cm Pizza'}"/>
-                        <span style="text-align: right;" th:text="${'$ ' + new java.text.DecimalFormat('0.00').format(order.getBasePizza().getPrice())}"/>
+                        <span style="text-align: right;" th:text="${'€ ' + new java.text.DecimalFormat('0.00').format(order.getBasePizza().getPrice())}"/>
                     </div>
                     <div th:each="ing: ${order.getIngredients()}" class="order-body-row">
                         <span th:text="${ing.getQuantity() + ' ' + ing.getIngredientName() + ' from ' + ing.getIngredientDetail().getProvince()}"/>
-                        <span style="text-align: right;" th:text="${'$ ' + new java.text.DecimalFormat('0.00').format(ing.getPrice())}"/>
+                        <span style="text-align: right;" th:text="${'€ ' + new java.text.DecimalFormat('0.00').format(ing.getPrice())}"/>
                     </div>
                 </div>
                 <div class="order-footer">
                     <span>Total</span>
-                    <span style="text-align: right;" th:text="${'$ ' + new java.text.DecimalFormat('0.00').format(order.getTotalPrice())}"></span>
+                    <span style="text-align: right;" th:text="${'€ ' + new java.text.DecimalFormat('0.00').format(order.getTotalPrice())}"></span>
                 </div>
 			</div>
 

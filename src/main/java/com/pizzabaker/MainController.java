@@ -240,6 +240,19 @@ public class MainController {
 		return new RedirectView("ingredients");
 	}
 	
+	@PostMapping("/updateIngredient")
+	public RedirectView updateIngredientDetail(Model model, @RequestParam("ingDetailId") long ingDetailId, @RequestParam("name") String name, @RequestParam("region") String region, @RequestParam("price") double price) {
+		IngredientDAO ingredientDAO = new IngredientDAO();
+		try {
+			ingredientDAO.updateIngredient(ingDetailId, name, region, price);
+		} catch (DBConnectionException e) {
+			e.printStackTrace();
+			model.addAttribute("errorMessage", e.getMessage());
+			new RedirectView("error");
+		}
+		return new RedirectView("ingredients");
+	}
+	
 	//--------------------------------------------------------------------------------------------------------------------
 	//--------------------------------------------------------------------------------------------------------------------
 	//------------------------------------------------- ORDER YOUR PIZZA -------------------------------------------------

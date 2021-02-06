@@ -58,7 +58,7 @@
             		<td th:text="${row.getName()}"/>
             		<td th:text="${row.getProvince()}"/>
             		<td th:text="${row.getSupplier()}"/>
-            		<td th:text="${'$ ' + row.getPrice()}"/>
+            		<td th:text="${'€ ' + row.getPrice()}"/>
                     <td th:text="${row.getQuantity()}"></td>
             		<td th:text="${row.isHidden() ? 'Hidden' : 'Show'}"/>
                     <td>
@@ -67,6 +67,8 @@
                         <i class="fas fa-trash icon-button" th:onclick="onClickDeleteIngredient([[${row.getIngredientDetailId()}]])"></i>
                         &nbsp;&nbsp;
                         <i class="fas fa-plus icon-button" th:onclick="openRestockModal([[${row.getIngredientDetailId()}]])"></i>
+                        &nbsp;&nbsp;
+                        <i class="fas fa-pencil-alt" th:onclick="openEditModal([[${row.getIngredientDetailId()}]], [[${row.getName()}]], [[${row.getProvince()}]], [[${row.getSupplier()}]], [[${row.getPrice()}]])"></i>
                     </td>
 				</tr>
             </tbody>
@@ -139,11 +141,62 @@
             </div>
         </div>
     </div>
+    
+    
+    
+    <!-- Modal Edit Ingredient -->
+    <div id="modal-edit-ingredient" class="modal">
+        <!-- Modal content -->
+        <div class="modal-content">
+            <div class="modal-title">
+                <span style="font-weight: bold;font-size: 22px;">Edit Ingredient</span>
+                <span id="close-modal-edit-ingredient" class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div style="display: grid;grid-template-columns: 150px auto;align-items: center;margin: 10px 0;">
+                    <span style="vertical-align: middle;">Name: </span>
+                    <input id="inputEditName" type="text" style="height: 40px;">
+                </div>
+                <div style="display: grid;grid-template-columns: 150px auto;align-items: center;margin: 10px 0;">
+                    <span style="vertical-align: middle;">Province: </span>
+                    <input id="inputEditProvince" type="text" style="height: 40px;">
+                </div>
+                <div style="display: grid;grid-template-columns: 150px auto;align-items: center;margin: 10px 0;">
+                    <span style="vertical-align: middle;">Supplier: </span>
+                    <span id="spanEditSupplier" style="vertical-align: middle;"></span>
+                </div>
+                <div style="display: grid;grid-template-columns: 150px auto;align-items: center;margin: 10px 0;">
+                    <span style="vertical-align: middle;">Price: </span>
+                    <input id="inputEditPrice" type="text" style="height: 40px;">
+                </div>
+            </div>
+            <div style="text-align: right;">
+                <button class="sky-btn" style="width: 150px;" onclick="onClickEditIngredient()">Edit</button>
+            </div>
+        </div>
+    </div>
 
     <script>
     	let INGREDIENT_TO_RESTOCK = -1;
+    	let ING_DETAIL_TO_EDIT = -1;
     
-        // initialize modal-add-ingredient
+        // initialize modals
+        const modalEditIngredient = document.getElementById('modal-edit-ingredient');
+        const spanCloseEditIngredient = document.getElementById("close-modal-edit-ingredient");
+        
+        spanCloseEditIngredient.onclick = function() {
+            modalEditIngredient.style.display = "none";
+        }
+        
+        function openEditModal(idIngDetail, name, province, supplier, price) {
+        	ING_DETAIL_TO_EDIT = idIngDetail;
+        	document.getElementById('inputEditName').value = name;
+        	document.getElementById('inputEditProvince').value = province;
+        	document.getElementById('spanEditSupplier').innerText = supplier;
+        	document.getElementById('inputEditPrice').value = price;
+        	modalEditIngredient.style.display = "block";
+        }
+        
         const modalRestockIngredient = document.getElementById('modal-restock-ingredient');
         const spanCloseRestockIngredient = document.getElementById("close-modal-restock-ingredient");
         
@@ -172,6 +225,8 @@
                 modalAddIngredient.style.display = "none";
             } else if (event.target == modalRestockIngredient) {
                 modalRestockIngredient.style.display = "none";
+            } else if (event.target == modalEditIngredient) {
+                modalEditIngredient.style.display = "none";
             }
         }
         
@@ -240,6 +295,28 @@
         		return;
         	}
         	post('/restockIngredient', {id: INGREDIENT_TO_RESTOCK, quantity});
+        }
+        
+        // edit ingredient
+        
+        function onClickEditIngredient(){
+        	const ingDetailId = ING_DETAIL_TO_EDIT;
+        	const name = document.getElementById('inputEditName').value.trim();
+        	if(name.length < 1 || name.length > 30){
+        		alert('Name must have between 1 and 30 characters');
+        		return;
+        	}
+        	const region = document.getElementById('inputEditProvince').value.trim();
+        	if(region.length < 1 || region.length > 30){
+        		alert('Province must have between 1 and 30 characters');
+        		return;
+        	}
+        	const price = Number(document.getElementById('inputEditPrice').value.trim());
+            if(isNaN(price) || price <= 0){
+            	alert('Price is not valid');
+            	return;
+            }
+        	post('/updateIngredient', {ingDetailId, name, region, price});
         }
 
 
