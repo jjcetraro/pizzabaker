@@ -22,7 +22,7 @@ public class ApiController {
 			Ingredient ingredient = new IngredientDAO().selectIngredientById(id);
 			JSONArray jsonArray = new JSONArray();
 			for(IngredientDetail detail : ingredient.getIngredientDetails()) {
-				if(detail.isHidden()) continue;
+				if(detail.isHidden() || detail.getQuantity() <= 0) continue;
 				JSONObject jsonObject = new JSONObject();
 				jsonObject.put("id", detail.getId());
 				jsonObject.put("region", detail.getProvince());

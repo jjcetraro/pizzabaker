@@ -70,6 +70,8 @@ public class OrderDAO {
 				callableStatement.setInt(4, ing.getQuantity());
 				callableStatement.setDouble(5, ing.getPrice());
 				callableStatement.execute();
+				// update ing detail stock
+				new IngredientDAO().restockIngredientDetail(ing.getIngredientDetail().getId(), -ing.getQuantity());
 			}
 			callableStatement.close();
 			connection.close();
