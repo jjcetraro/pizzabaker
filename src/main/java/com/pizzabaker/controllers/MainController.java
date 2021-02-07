@@ -1,4 +1,4 @@
-package com.pizzabaker;
+package com.pizzabaker.controllers;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -36,6 +36,11 @@ public class MainController {
 	//------------------------------------------------------ ORDERS ------------------------------------------------------
 	//--------------------------------------------------------------------------------------------------------------------
 	//--------------------------------------------------------------------------------------------------------------------
+	
+	@GetMapping("/")
+	public RedirectView home(Model model) {
+		return new RedirectView("/orders");
+	}
 	
 	@GetMapping("/orders")
 	public String orders(Model model) {

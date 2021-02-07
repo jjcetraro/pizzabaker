@@ -1,4 +1,4 @@
-package com.pizzabaker;
+package com.pizzabaker.controllers;
 
 import java.util.List;
 
