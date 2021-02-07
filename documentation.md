@@ -2,7 +2,7 @@
 
 
 
-![Entity Relationship Diagram](C:\Users\usuario\Downloads\Entity Relationship Diagram.png)
+![erd](erd.png)
 
 
 
@@ -10,9 +10,7 @@
 
 # Packages Diagram
 
-
-
-![packages_diagram](C:\Users\usuario\Downloads\packages_diagram.png)
+![packages_diagram](packages_diagram.png)
 
 
 
