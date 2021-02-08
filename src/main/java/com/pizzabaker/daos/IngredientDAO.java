@@ -217,7 +217,7 @@ public class IngredientDAO {
 	private Map<Long, List<IngredientDetail>> getMapIngredientsDetailsByIngredientId(Connection connection, boolean includeHidden, boolean includeDeleted) throws SQLException{
 		Map<Long, Supplier> mapSuppliers = null;
 		try{
-			mapSuppliers = new SupplierDAO().getMapSuppliersById();
+			mapSuppliers = new SupplierDAO().getMapSuppliersById(true);
 		}catch(Exception ex) {
 			throw new SQLException("There was an error trying to select the suppliers from the db", ex);
 		}

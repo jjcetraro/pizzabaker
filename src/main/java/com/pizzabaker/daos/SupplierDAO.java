@@ -55,20 +55,20 @@ public class SupplierDAO {
 		}
 	}
 	
-	public Map<Long, Supplier> getMapSuppliersById() throws DBConnectionException{
+	public Map<Long, Supplier> getMapSuppliersById(boolean includeDeleted) throws DBConnectionException{
 		Map<Long, Supplier> ret = new HashMap<>();
-		List<Supplier> listSuppliers = selectSuppliers(true);
+		List<Supplier> listSuppliers = selectSuppliers(true, includeDeleted);
 		for(Supplier supplier : listSuppliers) {
 			ret.put(supplier.getId(), supplier);
 		}
 		return ret;
 	}
 	
-	public List<Supplier> selectSuppliers(boolean includeHidden) throws DBConnectionException{
+	public List<Supplier> selectSuppliers(boolean includeHidden, boolean includeDeleted) throws DBConnectionException{
 		Connection connection = null;
 		try {
 			connection = DBConnection.GetConnection();
-			CallableStatement callableStatement = connection.prepareCall("{ call fetch_suppliers(false) }");
+			CallableStatement callableStatement = connection.prepareCall("{ call fetch_suppliers("+includeDeleted+") }");
 			ResultSet rs = callableStatement.executeQuery();
 			List<Supplier> ret = new ArrayList<>();
 			while(rs.next()) {

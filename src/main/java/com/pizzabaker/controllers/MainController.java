@@ -66,7 +66,7 @@ public class MainController {
 	public String suppliers(Model model) {
 		List<Supplier> suppliers = null;
 		try {
-			suppliers = new SupplierDAO().selectSuppliers(true);
+			suppliers = new SupplierDAO().selectSuppliers(true, false);
 		} catch (DBConnectionException e) {
 			e.printStackTrace();
 			model.addAttribute("errorMessage", e.getMessage());
@@ -161,7 +161,7 @@ public class MainController {
 		}
 		List<Supplier> suppliers = null;
 		try {
-			suppliers = new SupplierDAO().selectSuppliers(false);
+			suppliers = new SupplierDAO().selectSuppliers(false, false);
 		} catch (DBConnectionException e) {
 			e.printStackTrace();
 			model.addAttribute("errorMessage", e.getMessage());
@@ -202,7 +202,7 @@ public class MainController {
 	public RedirectView hideShowIngredientDetail(Model model, @RequestParam("name") String name, @RequestParam("details") String[] details) {
 		Map<Long, Supplier> mapSuppliersById = null;
 		try {
-			mapSuppliersById = new SupplierDAO().getMapSuppliersById();
+			mapSuppliersById = new SupplierDAO().getMapSuppliersById(true);
 		} catch (DBConnectionException e) {
 			e.printStackTrace();
 			model.addAttribute("errorMessage", e.getMessage());
