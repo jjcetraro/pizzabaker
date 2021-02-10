@@ -99,6 +99,7 @@
                     	<option 
                     		th:each="supplier: ${suppliers}"
                     		th:text="${supplier.getName()}"
+                    		th:data-ingredients="${supplier.getIngredients()}"
                     		th:value="${supplier.getId()}">
                     	</option>
                     </select>
@@ -252,6 +253,7 @@
             const selectSupplier = document.getElementById('selectSupplier');
             const supplierId = selectSupplier.value;
 			const supplierName = selectSupplier.options[selectSupplier.selectedIndex].text.trim();
+			const supplierIngredients = selectSupplier.options[selectSupplier.selectedIndex].dataset.ingredients;
             const price = Number(document.getElementById('inputPrice').value.trim());
             if(isNaN(price) || price <= 0){
             	alert('Price is not valid');
@@ -261,7 +263,7 @@
             detailsTableBody.insertAdjacentHTML('beforeend', `
             	<tr class="trDetail">
             		<td style="text-align:center">${region}</td>
-            		<td style="text-align:center" data-id="${supplierId}">${supplierName}</td>
+            		<td style="text-align:center" data-id="${supplierId}" data-ingredients="${supplierIngredients}">${supplierName}</td>
             		<td style="text-align:center">${price}</td>
             	</tr>
             `);
@@ -281,6 +283,12 @@
         	for(let i = 0; i < rows.length; i++){
         		const tr = rows[i];
         		const tds = tr.children;
+        		const supplierName = tds[1].innerText;
+        		const supplierIngredients = tds[1].dataset.ingredients;
+        		if(!supplierIngredients.toLowerCase().includes(name.toLowerCase())){
+        			alert('The ingredients of '+supplierName+' are "'+supplierIngredients+'", and '+name+' is not one of them');
+        			return;
+        		}
         		details.push(tds[0].innerText + '###' + tds[1].dataset.id + '###' + tds[2].innerText);
         	}
         	post('/addIngredient', {name, details});
